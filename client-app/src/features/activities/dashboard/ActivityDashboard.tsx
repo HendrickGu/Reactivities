@@ -1,33 +1,37 @@
-import React from "react";
-import { Grid, List } from "semantic-ui-react";
-import { Activity } from "../../../app/models/activity";
+import { Grid } from "semantic-ui-react";
 import ActivityList from "./ActivityList";
 import ActivityDetails from "../details/ActivityDetails";
 import ActivityForm from "../form/ActivityForm";
 import { useStore } from "../../../app/stores/store";
 import { observer } from "mobx-react-lite";
+import { useEffect } from "react";
+import LoadingComponment from "../../../app/layout/LoadingComponment";
 
-interface props {
-    activities: Activity[];
-    createOrEdit:(activity:Activity) => void;
-    deleteActivity:(id:string) =>void;
-    submitting:boolean;
-}
 
-export default observer( function Activitydashboard({activities, createOrEdit,deleteActivity,submitting}: props) {
-    const {activityStore} = useStore()
+export default observer( function Activitydashboard() {
+    const {activityStore} = useStore();
     const {selectedActivity,editMode} = activityStore
+    
+
+
+    useEffect(() => {
+     activityStore.loadActivities();
+    },[activityStore])
+  
+  
+  
+    if (activityStore.loadingInitial) return <LoadingComponment content='Loading app' />
     
     return (
         <Grid>
             <Grid.Column width='10'>
-                <ActivityList activities={activities} deleteActivity={deleteActivity} submitting={submitting}/>
+                <ActivityList />
             </Grid.Column>
             <Grid.Column width='6'>
                 {selectedActivity && !editMode &&
                 <ActivityDetails />}
                     {editMode&&
-                <ActivityForm createOrEdit={createOrEdit} submitting ={submitting}/>}
+                <ActivityForm/>}
 
             </Grid.Column>
         </Grid>
