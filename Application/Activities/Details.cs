@@ -1,4 +1,5 @@
 
+using Application.Core;
 using Domain;
 using MediatR;
 using Persistence;
@@ -8,13 +9,13 @@ namespace Application.Activities
     public class Details
     {
         // 1. 定义请求类，用于表示通过ID获取某个活动的请求
-        public class Query : IRequest<Activity>
+        public class Query : IRequest<Result<Activity>>
         {
             public Guid Id { get; set; }  // 定义请求的参数：活动的ID
         }
 
         // 2. 定义处理器，用于处理Query请求，并从数据库中查找活动
-        public class Handler : IRequestHandler<Query, Activity>
+        public class Handler : IRequestHandler<Query, Result<Activity>>
         {
             private readonly DataContext _context;
 
@@ -24,10 +25,12 @@ namespace Application.Activities
             }
 
             // 3. 实现Handle方法来处理请求
-            public async Task<Activity> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<Result<Activity>> Handle(Query request, CancellationToken cancellationToken)
             {
                 // 使用Entity Framework Core根据ID查找活动
-                return await _context.Activities.FindAsync(request.Id);
+                var activity = await _context.Activities.FindAsync(request.Id);
+                
+                return Result<Activity>.Success(activity);
             }
     }
 }
